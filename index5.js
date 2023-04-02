@@ -42,11 +42,11 @@ client.on('ready', async () => {
 });
 
 app.post('/interactions', verifyKeyMiddleware(PUBLIC_KEY), async (req, res) => {
-    
+
 })
 
 setInterval(() => {
-    http.get('http://your-app-name.cyclic-app.com');
+    http.get('https://miatiabot.cyclic.app/');
   }, 1800000);
 
 
