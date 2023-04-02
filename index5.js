@@ -1,3 +1,4 @@
+const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js'); 
 
 const client = new Client({ 
@@ -7,6 +8,9 @@ const client = new Client({
         GatewayIntentBits.MessageContent
     ] 
 });
+
+const app = express();
+
 
 // dot env
 //require('dotenv').config();
@@ -37,5 +41,21 @@ client.on('ready', async () => {
     console.log(ids);
 });
 
+app.post('/interactions', verifyKeyMiddleware(PUBLIC_KEY), async (req, res) => {
+    
+})
+
+setInterval(() => {
+    http.get('http://your-app-name.cyclic-app.com');
+  }, 1800000);
+
 
 client.login(token);
+
+app.get('/', async (req,res) =>{
+    return res.send('Follow documentation ')
+})
+
+app.listen(8999, () => {
+
+})
