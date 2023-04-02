@@ -1,26 +1,28 @@
-const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, GatewayIntentBits, DMChannel } = require('discord.js'); 
 
-const REACT_EMOJI = '👍';
-
-const token = process.env.BOT_TOKEN
-
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+const client = new Client({ 
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages, 
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMessageReactions
+    ] 
 });
 
-client.on('messageReactionAdd', async (reaction, user) => {
-  // Check if the user is not a bot and the reaction is the specified emoji
-  if (!user.bot && reaction.emoji.name === REACT_EMOJI) {
-    try {
-      // Get the DM channel for the user
-      const channel = await user.createDM();
-      // Send the message to the user
-      await channel.send(`Hello ${user.username}, thank you for reacting with ${REACT_EMOJI}!`);
-    } catch (error) {
-      console.error(`Failed to send DM to user ${user.tag}: ${error}`);
-    }
-  }
-});
+// dot env
+require('dotenv').config();
+const channel_id = process.env.CHANNEL_ID;
+const token = process.env.BOT_TOKEN;
+const guild_id = process.env.GUILD_ID;
 
-client.login(token);
+client.on('messageReactionAdd', (reaction, message, user) => {
+    
+    console.log(reaction);
+    console.log(message);
+    console.log(user);
+
+    console.log("Reaction recieved");
+})
+
+
+client.login(token)
