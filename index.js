@@ -21,8 +21,8 @@ client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
     
     // 起動確認用
-    //const channel = client.channels.cache.get(channel_id);
-    //channel.send('起きた');
+    const channel = client.channels.cache.get(channel_id);
+    channel.send('起きた');
     
     // get channels
     const fetchChannels = guild.channels.cache.sort((a, b) => a.createdAt - b.createdAt);
