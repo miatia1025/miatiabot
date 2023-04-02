@@ -20,6 +20,7 @@ require('dotenv').config();
 const channel_id = process.env.CHANNEL_ID;
 const token = process.env.BOT_TOKEN;
 const guild_id = process.env.GUILD_ID;
+const public_key = process.env.PUBLIC_KEY
 
 client.on("messageReactionAdd", (reaction, user) => {
 
@@ -54,7 +55,7 @@ client.on("messageReactionAdd", (reaction, user) => {
 
 client.login(token)
 
-app.post('/interactions', verifyKeyMiddleware(PUBLIC_KEY), async (req, res) => {
+app.post('/interactions', verifyKeyMiddleware(public_key), async (req, res) => {
 
 })
 
