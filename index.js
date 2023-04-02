@@ -1,55 +1,26 @@
+const Discord = require('discord.js');
+const client = new Discord.Client();
 
-const { Client, EmbedBuilder, Events, GatewayIntentBits } = require('discord.js');
-const { request } = require('undici');
+const REACT_EMOJI = '👍';
 
-// 
-token = process.env.BOT_TOKEN
+const token = process.env.BOT_TOKEN
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-const trim = (str, max) => (str.length > max ? `${str.slice(0, max - 3)}...` : str);
-
-client.once(Events.ClientReady, () => {
-	console.log('Ready!');
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-
-	const { commandName } = interaction;
-	await interaction.deferReply();
-
-	if (commandName === 'cat') {
-		const catResult = await request('https://aws.random.cat/meow');
-		const { file } = await catResult.body.json();
-		interaction.editReply({ files: [{ attachment: file, name: 'cat.png' }] });
-	} else if (commandName === 'urban') {
-		const term = interaction.options.getString('term');
-		const query = new URLSearchParams({ term });
-
-		const dictResult = await request(`https://api.urbandictionary.com/v0/define?${query}`);
-		const { list } = await dictResult.body.json();
-
-		if (!list.length) {
-			return interaction.editReply(`No results found for **${term}**.`);
-		}
-
-		const [answer] = list;
-
-		const embed = new EmbedBuilder()
-			.setColor(0xEFFF00)
-			.setTitle(answer.word)
-			.setURL(answer.permalink)
-			.addFields(
-				{ name: 'Definition', value: trim(answer.definition, 1024) },
-				{ name: 'Example', value: trim(answer.example, 1024) },
-				{
-					name: 'Rating',
-					value: `${answer.thumbs_up} thumbs up. ${answer.thumbs_down} thumbs down.`,
-				},
-			);
-		interaction.editReply({ embeds: [embed] });
-	}
+client.on('messageReactionAdd', async (reaction, user) => {
+  // Check if the user is not a bot and the reaction is the specified emoji
+  if (!user.bot && reaction.emoji.name === REACT_EMOJI) {
+    try {
+      // Get the DM channel for the user
+      const channel = await user.createDM();
+      // Send the message to the user
+      await channel.send(`Hello ${user.username}, thank you for reacting with ${REACT_EMOJI}!`);
+    } catch (error) {
+      console.error(`Failed to send DM to user ${user.tag}: ${error}`);
+    }
+  }
 });
 
 client.login(token);
