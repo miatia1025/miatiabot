@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, DMChannel } = require('discord.js'); 
 const { EmbedBuilder } = require('discord.js');
 const express = require('express');
+const { InteractionType, InteractionResponseType, verifyKeyMiddleware } = require('discord-interactions');
 
 const client = new Client({ 
     intents: [
