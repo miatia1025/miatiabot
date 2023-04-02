@@ -9,7 +9,7 @@ const client = new Client({
 });
 
 // dot env
-require('dotenv').config();
+//require('dotenv').config();
 const channel_id = process.env.CHANNEL_ID;
 const token = process.env.BOT_TOKEN;
 const guild_id = process.env.GUILD_ID;
