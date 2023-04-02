@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits, DMChannel } = require('discord.js'); 
 const { EmbedBuilder } = require('discord.js');
+const express = require('express');
 
 const client = new Client({ 
     intents: [
@@ -9,6 +10,10 @@ const client = new Client({
         GatewayIntentBits.GuildMessageReactions
     ] 
 });
+
+
+const app = express();
+
 
 // dot env
 require('dotenv').config();
@@ -48,3 +53,20 @@ client.on("messageReactionAdd", (reaction, user) => {
 
 
 client.login(token)
+
+app.post('/interactions', verifyKeyMiddleware(PUBLIC_KEY), async (req, res) => {
+
+})
+
+setInterval(() => {
+    http.get('https://miatiabot.cyclic.app/');
+  }, 1800000);
+
+
+app.get('/', async (req,res) =>{
+    return res.send('Follow documentation ')
+})
+
+app.listen(8999, () => {
+
+})
