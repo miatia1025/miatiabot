@@ -1,4 +1,4 @@
-const express = require('express');
+
 const { Client, GatewayIntentBits } = require('discord.js'); 
 
 const client = new Client({ 
@@ -8,8 +8,6 @@ const client = new Client({
         GatewayIntentBits.MessageContent
     ] 
 });
-
-const app = express();
 
 
 // dot env
@@ -41,21 +39,6 @@ client.on('ready', async () => {
     console.log(ids);
 });
 
-app.post('/interactions', verifyKeyMiddleware(PUBLIC_KEY), async (req, res) => {
-
-})
-
-setInterval(() => {
-    http.get('https://miatiabot.cyclic.app/');
-  }, 1800000);
-
 
 client.login(token);
 
-app.get('/', async (req,res) =>{
-    return res.send('Follow documentation ')
-})
-
-app.listen(8999, () => {
-
-})
