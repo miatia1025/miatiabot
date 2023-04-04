@@ -15,3 +15,12 @@ discordjsを使ってdiscordのbotが
 ・PINNIN_EMOJIで指定したリアクションが付いたとき  
 ・GUILD_IDとCHANNEL_IDで指定したところに  
 リアクションを付けたメッセージが飛んでくる  
+
+# 稼働に必要なこと  
+`git clone https://github.com/miatia1025/miatiabot`  
+`cd miatiabot`  
+`npm install`  
+  
+前述の`.env`の各値を記入  
+  
+`node index`  
