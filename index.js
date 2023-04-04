@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits, Partials ,Events } = require('discord.js'); 
 const { EmbedBuilder } = require('discord.js');
 const express = require('express');
-const { InteractionType, InteractionResponseType, verifyKeyMiddleware } = require('discord-interactions');
+const { verifyKeyMiddleware } = require('discord-interactions');
 
 const client = new Client({ 
     intents: [
@@ -29,7 +29,7 @@ const token = process.env.BOT_TOKEN;
 const guild_id = process.env.GUILD_ID;
 const public_key = process.env.PUBLIC_KEY;
 
-const pinningReact = "1090831468869197824"; // ControlDog
+const pinningReact = process.env.PINNING_EMOJI;
 const deletionReact = "❌";
 
 client.on("ready", () =>{
@@ -38,9 +38,8 @@ client.on("ready", () =>{
 
 // For Guild Messages
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    // 0
-    console.log("-------------------")	
-    
+    console.log(`embed = ${JSON.stringify(reaction.message.embeds[0])}`)
+
     // おまじない
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
@@ -52,23 +51,29 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 			return;
 		}
 	}
-
+    
+    // 0
+    console.log("-------------------")	
+    
     // A. Ignoreing Bot Part
     if(reaction.message.author.bot && user.id == client.application.id){
         //console.log(`reaction.message.author.bot = ${reaction.message.author.bot}`);
         //console.log(`reaction.message.author.id = ${user.id}`);
         //console.log(`client.application.id = ${client.application.id}`);
-
+        
         return;
     }
     
     // B0. Initialize
-    const isCustom = reaction.emoji.id !== null;
+    const isCustom = reaction.emoji.guild !== null;
+    const hasEmbed = typeof reaction.message.embeds[0] !== 'undefined' ? true : false;
+    
+    let isGuild = false;
     let pinningInvoke = false;
     
     // B1. Judge Pinning Flag
     if (isCustom){
-        console.log(`${reaction.message.author.username} / ${reaction.message.author.id}`);
+        console.log(`${user.username} / ${user.id}`);
         console.log(`reacted with ${reaction.emoji.identifier}`);
         
         pinningInvoke = (reaction.emoji.id == pinningReact);
@@ -89,43 +94,126 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     console.log(`pinningInvoke : ${pinningInvoke}`);
     
     // C0. Judge Flags
-    if(pinningInvoke){    
-        if(reaction.message.guild.id == guild_id && reaction.message.channelId == channel_id){
-            
-            // get server icon url and a alternative
-            server_icon = reaction.message.guild.iconURL()
-            
-            if (server_icon==null){
-                server_icon = "https://raw.githubusercontent.com/miatia1025/miatiabot/main/img/noimg_1.png"
-            }
-            
-            // get user reacted
-            console.log(user.username)
-            console.log(user.id)
-            
-            // get reacted user
-            console.log(reaction.message.author.username)
-            console.log(reaction.message.author.id)
-            
-            const emb = new EmbedBuilder()
-            .setColor(0x00FFFF)
-            .setAuthor({ name: `${reaction.message.author.username +'#'+ reaction.message.author.discriminator}`, iconURL: `${reaction.message.author.displayAvatarURL(reaction.message.author.avatar)}`})
-            .setThumbnail(server_icon)
-            .setDescription(`${reaction.message.toString()}`)
-            .addFields({ name: '\u200B', value: `[▷ Jump](${reaction.message.url})`, inline: true })
-            .setTimestamp()
-            .setFooter({ text: `#${reaction.message.channel.name}`, iconURL: server_icon })
-            
-            msg = reaction.message.channel.send({embeds: [emb]})
-            .then(async(msg) => {
-                await msg.react(deletionReact);
-            });
-            
-            dm = client.users.send(user.id, {embeds: [emb]})
-            .then(async(dm) => {
-                await dm.react(deletionReact);
-            });
+    if(pinningInvoke){
+        try{
+            isGuild = typeof reaction.message.guild.id ? true : false;
+        }catch{
+            isGuild = false;
         };
+        
+        if(isGuild){
+            
+            if(reaction.message.guild.id == guild_id){
+                
+                // get server icon url and a alternative
+                server_icon = reaction.message.guild.iconURL()
+                
+                if (server_icon==null){
+                    server_icon = "https://raw.githubusercontent.com/miatia1025/miatiabot/main/img/noimg_1.png"
+                }
+                
+                // get user reacted
+                console.log(user.username)
+                console.log(user.id)
+                
+                // get reacted user
+                console.log(reaction.message.author.username)
+                console.log(reaction.message.author.id)
+                
+                // channel selection for debug
+                /////
+                const hardChannel = client.channels.cache.get(channel_id);
+                const useHardChannel = true;
+                const embeds = [];
+                
+                if(hasEmbed){
+                    // create new embeds
+                    const emb = new EmbedBuilder()
+                        .setColor(0x00FFFF)
+                        .setTitle(`__Resend from Here__`)
+                        .setURL(`${reaction.message.url}`)
+                        .setAuthor({ name: `${reaction.message.author.username +'#'+ reaction.message.author.discriminator}`, iconURL: `${reaction.message.author.displayAvatarURL(reaction.message.author.avatar)}`})
+                        .setThumbnail(server_icon)
+                        .setDescription(`${reaction.message.toString()}\u200B`)
+                        .addFields({ name: '\u200B', value: `[▷ Jump](${reaction.message.url})`, inline: true })
+                        .setTimestamp()
+                        .setFooter({ text: `#${reaction.message.channel.name}`, iconURL: server_icon })
+    
+                    if (reaction.message.attachments.size > 0) {
+                        const urls = reaction.message.attachments.map((attachment) => attachment.url);
+                        emb.setImage(urls[0]);
+                    }
+
+                    // fetch existing embeds
+                    getEmbs = reaction.message.embeds
+
+                    copiedEmbs = getEmbs.map(emb =>{
+                        const newEmb = new EmbedBuilder(emb);
+                        newEmb.setColor(0x4a708d);
+                        return newEmb;
+                    });
+
+                    // append those embeds
+                    const embs = [emb, ...copiedEmbs];
+
+                    // Send!
+                    msg = hardChannel.send({embeds: embs})
+                        .then(async(msg) => {
+                            await msg.react(deletionReact);
+                    });
+                    
+                    dm = client.users.send(user.id, {embeds: embs})
+                        .then(async(dm) => {
+                        await dm.react(deletionReact);
+                    });
+                    
+                }else if(useHardChannel){
+                    // create a embed
+                    const images = reaction.message.attachments.images
+                    const emb = new EmbedBuilder()
+                        .setColor(0x00FFFF)
+                        .setAuthor({ name: `${reaction.message.author.username +'#'+ reaction.message.author.discriminator}`, iconURL: `${reaction.message.author.displayAvatarURL(reaction.message.author.avatar)}`})
+                        .setThumbnail(server_icon)
+                        .setDescription(`${reaction.message.toString()}\u200B`)
+                        .addFields({ name: '\u200B', value: `[▷ Jump](${reaction.message.url})`, inline: true })
+                        .setTimestamp()
+                        .setFooter({ text: `#${reaction.message.channel.name}`, iconURL: server_icon })
+    
+                    // get images
+                    if (reaction.message.attachments.size > 0) {
+                        const urls = reaction.message.attachments.map((attachment) => attachment.url);
+                        emb.setImage(urls[0]);
+                    }
+    
+                    // Send!
+                    msg = hardChannel.send({embeds: [emb]})
+                        .then(async(msg) => {
+                            await msg.react(deletionReact);
+                    });
+                    
+                    dm = client.users.send(user.id, {embeds: [emb]})
+                        .then(async(dm) => {
+                        await dm.react(deletionReact);
+                    });
+                        
+                }/*
+                else{
+                    // Send!
+                    msg = reaction.message.channel.send({embeds: [emb]})
+                        .then(async(msg) => {
+                            await msg.react(deletionReact);
+                    });
+                }
+                */
+                /*
+                // Send!
+                dm = client.users.send(user.id, {embeds: [emb]})
+                    .then(async(dm) => {
+                        await dm.react(deletionReact);
+                });
+                */
+            };
+        }
     };
 });
 
@@ -148,18 +236,24 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 	}
     
     // Deletion Message Part
-    const isCustom = reaction.emoji.id !== null;
+    const isCustom = /^<a?:.+:\d+>$/.test(reaction.emoji.identifier);
     let deletionInvoke = false;
     
     if (isCustom){
-        deletionInvoke = (reaction.emoji.id == deletionReact);
+        deletionInvoke = (reaction.emoji.id == deletionReact && reaction.message.author.id == client.application.id);
     }else{
-        deletionInvoke = (reaction.emoji.name == deletionReact);
+        deletionInvoke = (reaction.emoji.name == deletionReact && reaction.message.author.id == client.application.id);
     }
     console.log(`deletionInvoke : ${deletionInvoke}`);
     
     if (reaction.message.author.id == client.application.id && deletionInvoke){
-        reaction.message.delete();
+        try{
+            await reaction.message.fetch();
+            await reaction.message.delete();
+        }catch(error){
+            console.log("Missing!");
+            console.log(error);
+        }
     };
     
 });
