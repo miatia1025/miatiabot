@@ -2,6 +2,8 @@ const { Client, GatewayIntentBits, Partials ,Events } = require('discord.js');
 const { EmbedBuilder } = require('discord.js');
 const express = require('express');
 const { verifyKeyMiddleware } = require('discord-interactions');
+const fs = require('fs');
+
 
 const client = new Client({ 
     intents: [
@@ -23,7 +25,9 @@ const app = express();
 
 
 // dot env
-require('dotenv').config();
+if (fs.existsSync('.env')) {
+    require('dotenv').config();
+};
 const channel_id = process.env.CHANNEL_ID;
 const token = process.env.BOT_TOKEN;
 const guild_id = process.env.GUILD_ID;
@@ -196,24 +200,9 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                         await dm.react(deletionReact);
                     });
                         
-                }/*
-                else{
-                    // Send!
-                    msg = reaction.message.channel.send({embeds: [emb]})
-                        .then(async(msg) => {
-                            await msg.react(deletionReact);
-                    });
-                }
-                */
-                /*
-                // Send!
-                dm = client.users.send(user.id, {embeds: [emb]})
-                    .then(async(dm) => {
-                        await dm.react(deletionReact);
-                });
-                */
+                };
             };
-        }
+        };
     };
 });
 
