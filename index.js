@@ -258,14 +258,16 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     console.log(`deletionInvoke : ${deletionInvoke}`);
     
     try{
-            if (reaction.message.author.id == client.application.id && deletionInvoke){
-                reaction.message.fetch();
-                reaction.message.delete();
-            }
+        if (reaction.message.author.id == client.application.id && deletionInvoke){
+            await reaction.message.fetch();
+            await reaction.message.delete();
+        }else{
+            return;
+        }
     }catch(error){
-                console.log("Missing!");
-                console.log(error);
-        };    
+        console.log("Missing!");
+        console.log(error);
+    };    
 });
 
 client.login(token);
