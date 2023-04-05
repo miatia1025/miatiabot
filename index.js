@@ -229,7 +229,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 });
 
 // For DMs
-client.on(Events.MessageReactionAdd, (reaction, user) => {
+client.on(Events.MessageReactionAdd, async (reaction, user) => {
     if(user.id == client.application.id){
         return;
     }
@@ -238,7 +238,7 @@ client.on(Events.MessageReactionAdd, (reaction, user) => {
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
 		try {
-			reaction.fetch();
+			await reaction.fetch();
 		} catch (error) {
 			console.error('Something went wrong when fetching the message:', error);
 			// Return as `reaction.message.author` may be undefined/null
@@ -257,16 +257,15 @@ client.on(Events.MessageReactionAdd, (reaction, user) => {
     }
     console.log(`deletionInvoke : ${deletionInvoke}`);
     
-    if (reaction.message.author.id == client.application.id && deletionInvoke){
-        try{
-            reaction.message.fetch();
-            reaction.message.delete();
-        }catch(error){
-            console.log("Missing!");
-            console.log(error);
-        }
-    };
-    
+    try{
+            if (reaction.message.author.id == client.application.id && deletionInvoke){
+                reaction.message.fetch();
+                reaction.message.delete();
+            }
+    }catch(error){
+                console.log("Missing!");
+                console.log(error);
+        };    
 });
 
 client.login(token);
