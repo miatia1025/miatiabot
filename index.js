@@ -80,7 +80,16 @@ client.on(Events.MessageReactionAdd, (reaction, user) => {
     console.log("-------------------")	
     
     // A. Ignoreing Bot Part
-    if(reaction.message.author.bot && user.id == client.application.id){
+    let isBot = false;
+    try{
+        if(reaction.message.author.bot){
+            isBot = true;
+        }
+    }catch{
+        isBot = false
+    }
+    
+    if(isBot && user.id == client.application.id){
         //console.log(`reaction.message.author.bot = ${reaction.message.author.bot}`);
         //console.log(`reaction.message.author.id = ${user.id}`);
         //console.log(`client.application.id = ${client.application.id}`);
