@@ -269,10 +269,6 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
 });
 
-setInterval(() => {
-    http.get('https://miatiabot.onrender.com');
-}, 600000);
-
 client.login(token);
 
 
