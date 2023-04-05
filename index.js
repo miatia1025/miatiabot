@@ -36,8 +36,28 @@ const public_key = process.env.PUBLIC_KEY;
 const pinningReact = process.env.PINNING_EMOJI;
 const deletionReact = "❌";
 
-client.on("ready", () =>{
+client.on("ready", async () =>{
     console.log("waked up");
+
+    // initialize
+    const guild = client.guilds.cache.get(guild_id);
+    console.log(`Logged in as ${client.user.tag}`);
+    
+    // 起動確認用
+    const channel = client.channels.cache.get(channel_id);
+    channel.send('起きた');
+    
+    // get channels
+    const fetchChannels = guild.channels.cache.sort((a, b) => a.createdAt - b.createdAt);
+
+    const ids = fetchChannels.map(info => `${info.id}`)
+    const names = fetchChannels.map(info => `${info.name}`)
+
+    const results = Object.fromEntries(ids.map((id, i) => [id, names[i]]));
+
+    // show ids
+    console.log(results);
+    console.log(ids);
 })
 
 // For Guild Messages
