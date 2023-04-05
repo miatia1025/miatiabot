@@ -269,7 +269,6 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
 });
 
-
 client.login(token);
 
 app.post('/interactions', verifyKeyMiddleware(public_key), async (req, res) => {
