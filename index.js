@@ -62,15 +62,14 @@ client.on("ready", async () =>{
 
 // For Guild Messages
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    console.log(`embed = ${JSON.stringify(reaction.message.embeds[0])}`)
-
+    
     // おまじない
 	if (reaction.partial) {
-		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+        // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
 		try {
-			await reaction.fetch();
+            await reaction.fetch();
 		} catch (error) {
-			console.error('Something went wrong when fetching the message:', error);
+            console.error('Something went wrong when fetching the message:', error);
 			// Return as `reaction.message.author` may be undefined/null
 			return;
 		}
@@ -78,6 +77,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
     // 0
     console.log("-------------------")	
+    console.log(`embed = ${JSON.stringify(reaction.message.embeds[0])}`)
     
     // A. Ignoreing Bot Part
     if(reaction.message.author.bot && user.id == client.application.id){
