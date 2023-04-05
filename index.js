@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits, Partials ,Events } = require('discord.js'); 
 const { EmbedBuilder } = require('discord.js');
-const express = require('express');
+///const express = require('express');
 const { verifyKeyMiddleware } = require('discord-interactions');
 const fs = require('fs');
 
@@ -21,7 +21,7 @@ const client = new Client({
 });
 
 
-const app = express();
+///const app = express();
 
 
 // dot env
@@ -269,13 +269,18 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
 });
 
+setInterval(() => {
+    http.get('https://miatiabot.onrender.com');
+}, 600000);
 
 client.login(token);
 
-app.post('/interactions', verifyKeyMiddleware(public_key), async (req, res) => {
 
-});
 
-app.get('/', async (req,res) =>{
-    return res.send('Follow documentation ')
-});
+///app.post('/interactions', verifyKeyMiddleware(public_key), async (req, res) => {
+///
+///});
+
+///app.get('/', async (req,res) =>{
+///    return res.send('Follow documentation ')
+///});
