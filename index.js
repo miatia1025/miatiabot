@@ -161,11 +161,12 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                     const embs = [emb, ...copiedEmbs];
 
                     // Send!
+                    /*
                     msg = hardChannel.send({embeds: embs})
                         .then(async(msg) => {
                             await msg.react(deletionReact);
                     });
-                    
+                    */
                     dm = client.users.send(user.id, {embeds: embs})
                         .then(async(dm) => {
                         await dm.react(deletionReact);
@@ -190,11 +191,12 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                     }
     
                     // Send!
+                    /*
                     msg = hardChannel.send({embeds: [emb]})
                         .then(async(msg) => {
                             await msg.react(deletionReact);
                     });
-                    
+                    */
                     dm = client.users.send(user.id, {embeds: [emb]})
                         .then(async(dm) => {
                         await dm.react(deletionReact);
