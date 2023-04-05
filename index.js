@@ -259,8 +259,8 @@ client.on(Events.MessageReactionAdd, (reaction, user) => {
     
     if (reaction.message.author.id == client.application.id && deletionInvoke){
         try{
-            await reaction.message.fetch();
-            await reaction.message.delete();
+            reaction.message.fetch();
+            reaction.message.delete();
         }catch(error){
             console.log("Missing!");
             console.log(error);
