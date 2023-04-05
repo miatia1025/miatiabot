@@ -61,14 +61,14 @@ client.on("ready", async () =>{
 })
 
 // For Guild Messages
-client.on(Events.MessageReactionAdd, async (reaction, user) => {
+client.on(Events.MessageReactionAdd, (reaction, user) => {
     console.log(`embed = ${JSON.stringify(reaction.message.embeds[0])}`)
 
     // おまじない
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
 		try {
-			await reaction.fetch();
+			reaction.fetch();
 		} catch (error) {
 			console.error('Something went wrong when fetching the message:', error);
 			// Return as `reaction.message.author` may be undefined/null
@@ -229,7 +229,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 });
 
 // For DMs
-client.on(Events.MessageReactionAdd, async (reaction, user) => {
+client.on(Events.MessageReactionAdd, (reaction, user) => {
     if(user.id == client.application.id){
         return;
     }
@@ -238,7 +238,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
 		try {
-			await reaction.fetch();
+			reaction.fetch();
 		} catch (error) {
 			console.error('Something went wrong when fetching the message:', error);
 			// Return as `reaction.message.author` may be undefined/null
