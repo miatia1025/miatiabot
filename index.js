@@ -1,10 +1,9 @@
+// 0.import area
 const { Client, GatewayIntentBits, Partials ,Events } = require('discord.js'); 
 const { EmbedBuilder } = require('discord.js');
-const express = require('express');
-const { verifyKeyMiddleware } = require('discord-interactions');
 const fs = require('fs');
 
-
+// 0. create client area
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds,
@@ -20,83 +19,77 @@ const client = new Client({
     ]
 });
 
-
-const app = express();
-
-
-// dot env
+// 0. read dot env area
 if (fs.existsSync('.env')) {
     require('dotenv').config();
 };
 const channel_id = process.env.CHANNEL_ID;
 const token = process.env.BOT_TOKEN;
 const guild_id = process.env.GUILD_ID;
-const public_key = process.env.PUBLIC_KEY;
 
 const pinningReact = process.env.PINNING_EMOJI;
 const deletionReact = "❌";
 
+// 0. On ready function
+//// it shows all channel ids from [guild_id] your terminal
 client.on("ready", async () =>{
+    // A. Hello to terminal
     console.log("waked up");
-
-    // initialize
-    const guild = client.guilds.cache.get(guild_id);
     console.log(`Logged in as ${client.user.tag}`);
+
+    // B-0. Get guild
+    const guild = client.guilds.cache.get(guild_id);
     
-    // 起動確認用
+    // B-1. Hello to discord
     const channel = client.channels.cache.get(channel_id);
     channel.send('起きた');
     
-    // get channels
+    // C-0. Initialization for showing all ids
     const fetchChannels = guild.channels.cache.sort((a, b) => a.createdAt - b.createdAt);
 
+    // C-1. Get Ids.
     const ids = fetchChannels.map(info => `${info.id}`)
     const names = fetchChannels.map(info => `${info.name}`)
-
     const results = Object.fromEntries(ids.map((id, i) => [id, names[i]]));
 
-    // show ids
+    // D. Show Ids
     console.log(results);
     console.log(ids);
-})
+});
 
-// For Guild Messages
+// 1. Functions on guild messages
+//// 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
-    // おまじない
+    // A. Fetch old reactions (Copied and Pasted Code >_<)
 	if (reaction.partial) {
-        // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+        /// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
 		try {
             await reaction.fetch();
 		} catch (error) {
             console.error('Something went wrong when fetching the message:', error);
-			// Return as `reaction.message.author` may be undefined/null
+			/// Return as `reaction.message.author` may be undefined/null
 			return;
 		}
 	}
     
-    // 0
-    console.log("-------------------")	
-    console.log(`embed = ${JSON.stringify(reaction.message.embeds[0])}`)
+    // B. show borderline on console for its appearance
+    console.log("-------------------")
     
-    // A. Ignoreing Bot Part
+    // C. Quit when both of message and reactions is mine
     if(reaction.message.author.bot && user.id == client.application.id){
-        //console.log(`reaction.message.author.bot = ${reaction.message.author.bot}`);
-        //console.log(`reaction.message.author.id = ${user.id}`);
-        //console.log(`client.application.id = ${client.application.id}`);
-        
         return;
     }
     
-    // B0. Initialize
+    // D-0. Set some flags and initial flags
     const isCustom = reaction.emoji.guild !== null;
     const hasEmbed = typeof reaction.message.embeds[0] !== 'undefined' ? true : false;
-    
     let isGuild = false;
     let pinningInvoke = false;
     
-    // B1. Judge Pinning Flag
+    // D-1. Set pinning flag ${pinningInvoke}
     if (isCustom){
+
         console.log(`${user.username} / ${user.id}`);
         console.log(`reacted with ${reaction.emoji.identifier}`);
         
@@ -105,6 +98,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         console.log(`reaction.emoji.id = ${reaction.emoji.id}`);
         console.log(`pinningReact = ${pinningReact}`);
     }else{
+        // If ${user} reacted custom emoji, reaction.emoji has no identifier propety
         console.log(`${reaction.message.author.username} / ${reaction.message.author.id}`);
         console.log(`reacted with ${reaction.emoji.name}`);
         
@@ -114,44 +108,49 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         console.log(`pinningReact = ${pinningReact}`);
     }
     
-    // B3. Show flags
+    // X. Show ${pinningInvoke} for debug
     console.log(`pinningInvoke : ${pinningInvoke}`);
     
-    // C0. Judge Flags
+    // D-2. Create and send the reacted message as embeds
     if(pinningInvoke){
+        // D2-0. Is on guild?
         try{
             isGuild = typeof reaction.message.guild.id ? true : false;
         }catch{
             isGuild = false;
         };
         
+        // D2-1. If is the message on guild, create and send embeds
         if(isGuild){
             
+            // D21-0. Area limitation with ${guild_id}
             if(reaction.message.guild.id == guild_id){
                 
-                // get server icon url and a alternative
-                server_icon = reaction.message.guild.iconURL()
-                
-                if (server_icon==null){
-                    server_icon = "https://raw.githubusercontent.com/miatia1025/miatiabot/main/img/noimg_1.png"
-                }
-                
-                // get user reacted
+                // X. Show reaction sender infomations
                 console.log(user.username)
                 console.log(user.id)
                 
-                // get reacted user
+                // X. Show reaction receiver infomations
                 console.log(reaction.message.author.username)
                 console.log(reaction.message.author.id)
                 
-                // channel selection for debug
-                /////
+                ///// D210-0. Set HARDCODED channel selector /////
+                //////////////////////////////////////////////////
                 const hardChannel = client.channels.cache.get(channel_id);
                 const useHardChannel = true;
-                const embeds = [];
-                
+                //////////////////////////////////////////////////
+
+                // D210-0. Get or set server icon
+                server_icon = reaction.message.guild.iconURL()
+
+                if (server_icon==null){
+                    server_icon = "https://raw.githubusercontent.com/miatia1025/miatiabot/main/img/noimg_1.png"
+                }
+
+                // D210-1. Create and receive embeds
                 if(hasEmbed){
-                    // create new embeds
+
+                    // D2101-1. Create new embeds
                     const emb = new EmbedBuilder()
                         .setColor(0x00FFFF)
                         .setTitle(`__Resend from Here__`)
@@ -163,12 +162,13 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                         .setTimestamp()
                         .setFooter({ text: `#${reaction.message.channel.name}`, iconURL: server_icon })
     
+                    // D2101-1. ...and set thumbnail if it has images
                     if (reaction.message.attachments.size > 0) {
                         const urls = reaction.message.attachments.map((attachment) => attachment.url);
                         emb.setImage(urls[0]);
                     }
 
-                    // fetch existing embeds
+                    // D2101-2. Receive embeds from the reacted message
                     getEmbs = reaction.message.embeds
 
                     copiedEmbs = getEmbs.map(emb =>{
@@ -177,24 +177,31 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                         return newEmb;
                     });
 
-                    // append those embeds
+                    // D2101-3. Append original and received embeds
                     const embs = [emb, ...copiedEmbs];
 
-                    // Send!
-                    /*
+                    // D2101-4. Send embeds!
+                    
+                    //*
+                    // To channel
                     msg = hardChannel.send({embeds: embs})
                         .then(async(msg) => {
                             await msg.react(deletionReact);
                     });
-                    */
+                    /*/
+                    //*/
+
+                    // To direct message
                     dm = client.users.send(user.id, {embeds: embs})
                         .then(async(dm) => {
                         await dm.react(deletionReact);
                     });
                     
-                }else if(useHardChannel){
-                    // create a embed
-                    const images = reaction.message.attachments.images
+                }
+                // D210-2. Create and send embeds
+                else if(useHardChannel){
+
+                    // D2102-1. Create embeds
                     const emb = new EmbedBuilder()
                         .setColor(0x00FFFF)
                         .setAuthor({ name: `${reaction.message.author.username +'#'+ reaction.message.author.discriminator}`, iconURL: `${reaction.message.author.displayAvatarURL(reaction.message.author.avatar)}`})
@@ -204,59 +211,78 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                         .setTimestamp()
                         .setFooter({ text: `#${reaction.message.channel.name}`, iconURL: server_icon })
     
-                    // get images
+                    // D2102-2. Get images and set thumbnail
                     if (reaction.message.attachments.size > 0) {
                         const urls = reaction.message.attachments.map((attachment) => attachment.url);
                         emb.setImage(urls[0]);
                     }
     
-                    // Send!
-                    /*
+                    // D2102-3. Send embeds!
+                    //*
+                    // To channel
                     msg = hardChannel.send({embeds: [emb]})
                         .then(async(msg) => {
                             await msg.react(deletionReact);
                     });
-                    */
+                    /*/
+                    //*/
+
+                    // To direct message
                     dm = client.users.send(user.id, {embeds: [emb]})
                         .then(async(dm) => {
                         await dm.react(deletionReact);
                     });
                         
+                }
+                // D210-3. For sending the same channel to the message
+                else{
+
+                    // Not implemented ><
+
                 };
             };
         };
     };
 });
 
-// For DMs
+// 2. Functions on DMs
+////
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    if(user.id == client.application.id){
-        return;
-    }
-
-    // おまじない
+    
+    // A. Fetch old reactions (Copied and Pasted Code >_<)
 	if (reaction.partial) {
-		// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
+        /// If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
 		try {
-			await reaction.fetch();
+            await reaction.fetch();
 		} catch (error) {
-			console.error('Something went wrong when fetching the message:', error);
-			// Return as `reaction.message.author` may be undefined/null
+            console.error('Something went wrong when fetching the message:', error);
+			/// Return as `reaction.message.author` may be undefined/null
 			return;
 		}
 	}
+
+    // B. Quit if reactions from myself
+    if(user.id == client.application.id){
+        return;
+    }
     
-    // Deletion Message Part
+    // C. Set some flags
+    // ...why I had write anothe way to specify isCustom
     const isCustom = /^<a?:.+:\d+>$/.test(reaction.emoji.identifier);
+    //const isCustom = reaction.emoji.guild !== null;
     let deletionInvoke = false;
     
+    // D. Set ${deletionInvoke} with specific emoji
     if (isCustom){
         deletionInvoke = (reaction.emoji.id == deletionReact && reaction.message.author.id == client.application.id);
     }else{
         deletionInvoke = (reaction.emoji.name == deletionReact && reaction.message.author.id == client.application.id);
     }
+
+    // X. Show ${deletionInvoke}
     console.log(`deletionInvoke : ${deletionInvoke}`);
     
+    // D. Deletion the message reacted with ${deletionReact}
     if (reaction.message.author.id == client.application.id && deletionInvoke){
         try{
             await reaction.message.fetch();
@@ -269,12 +295,6 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
 });
 
+// 3. launch client!
+////
 client.login(token);
-
-app.post('/interactions', verifyKeyMiddleware(public_key), async (req, res) => {
-
-});
-
-app.get('/', async (req,res) =>{
-    return res.send('Follow documentation ')
-});
