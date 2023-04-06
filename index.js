@@ -1,5 +1,5 @@
 // 0.import area
-const { Client, GatewayIntentBits, Partials ,Events } = require('discord.js'); 
+const { Client, GatewayIntentBits, Partials ,Events, messageLink } = require('discord.js'); 
 const { EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 
@@ -41,8 +41,8 @@ client.on("ready", async () =>{
     const guild = client.guilds.cache.get(guild_id);
     
     // B-1. Hello to discord
-    const channel = client.channels.cache.get(channel_id);
-    channel.send('起きた');
+    //const channel = client.channels.cache.get(channel_id);
+    //channel.send('起きた');
     
     // C-0. Initialization for showing all ids
     const fetchChannels = guild.channels.cache.sort((a, b) => a.createdAt - b.createdAt);
@@ -57,7 +57,7 @@ client.on("ready", async () =>{
     console.log(ids);
 });
 
-// 1. Functions on guild messages
+// 1. Functions in reactionAdd on guild messages
 //// 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
@@ -140,6 +140,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                 const useHardChannel = true;
                 //////////////////////////////////////////////////
 
+                
                 // D210-0. Get or set server icon
                 server_icon = reaction.message.guild.iconURL()
 
@@ -182,7 +183,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
                     // D2101-4. Send embeds!
                     
-                    //*
+                    /*
                     // To channel
                     msg = hardChannel.send({embeds: embs})
                         .then(async(msg) => {
@@ -198,6 +199,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                     });
                     
                 }
+
                 // D210-2. Create and send embeds
                 else if(useHardChannel){
 
@@ -218,7 +220,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                     }
     
                     // D2102-3. Send embeds!
-                    //*
+                    /*
                     // To channel
                     msg = hardChannel.send({embeds: [emb]})
                         .then(async(msg) => {
@@ -295,6 +297,132 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     
 });
 
-// 3. launch client!
+// 3. Message embeds
+////
+client.on(Events.MessageCreate, async (message) =>{
+    try{
+        console.log(message.content);
+    }catch(e){
+        return;
+    };
+
+    const discordUrlPattern = /https?:\/\/(?:[a-z]+\.)?discord\.com\/channels\/[0-9]+\/[0-9]+\/[0-9]+/g;
+    const twitterUrlPattern = /https?:\/\/twitter\.com\/.+/g;
+
+    const msgContent = message.content.toString();
+
+    let discordUrls = msgContent.match(discordUrlPattern);
+    let twitterUrls = msgContent.match(twitterUrlPattern);
+
+    if(discordUrls || twitterUrls){
+        console.log("received special urls");
+    }else{
+        return;
+    }
+
+    console.log(`discordUrls : ${discordUrls}`);
+    console.log(`twitterUrls : ${twitterUrls}`);
+
+    const hasDiscordMessageUrls = discordUrls !== null && discordUrls.length > 0;
+    const hasTwitterMessageUrls = twitterUrls !== null && twitterUrls.length > 0;
+    if (hasTwitterMessageUrls){
+
+        fxUrls = twitterUrls.map(url => url.replace("twitter.com", "fxtwitter.com"));
+        console.log(`fxUrls : ${fxUrls}`)
+
+        let channel = message.channel;
+        fxMsg = channel.send(fxUrls.toString().replace(/,/g, "\n"))
+    }
+
+    if(hasDiscordMessageUrls){
+        console.log(`${message.author.tag} : Sent message link!`);
+        
+        // Create embeds
+        let embeds = []
+        
+        for (let i = 0; i < discordUrls.length; i++){
+            const ids = discordUrls[i].match(/\d+/g)
+            const msg = await client.channels.cache.get(ids[1])?.messages.fetch(ids[2]).catch(err => null) ?? null
+            
+            // D210-0. Get or set server icon
+            let server_icon = msg.guild.iconURL()
+            
+            if (server_icon==null){
+                server_icon = "https://raw.githubusercontent.com/miatia1025/miatiabot/main/img/noimg_1.png"
+            }
+            
+            const hasEmbed = typeof msg.embeds[0] !== 'undefined' ? true : false;
+
+            if(hasEmbed){
+                // D2101-1. Create new embeds
+                const emb = new EmbedBuilder()
+                    .setColor(0x00FFFF)
+                    .setTitle(`__Resend from Here__`)
+                    .setURL(`${message.url}`)
+                    .setAuthor({ name: `${message.author.username +'#'+ message.author.discriminator}`, iconURL: `${message.author.displayAvatarURL(message.author.avatar)}`})
+                    .setThumbnail(server_icon)
+                    .setDescription(`${message.toString()}\u200B`)
+                    .addFields({ name: '\u200B', value: `[▷ Jump](${message.url})`, inline: true })
+                    .setTimestamp()
+                    .setFooter({ text: `#${message.channel.name}`, iconURL: server_icon })
+
+                // D2101-1. ...and set thumbnail if it has images
+                if (message.attachments.size > 0) {
+                    const discordUrls = message.attachments.map((attachment) => attachment.url);
+                    emb.setImage(discordUrls[0]);
+                }
+                // D2101-2. Receive embeds from the reacted message
+                getEmbs = msg.embeds
+
+                copiedEmbs = getEmbs.map(emb =>{
+                    const newEmb = new EmbedBuilder(emb);
+                        newEmb.setColor(0x4a708d);             
+                        return newEmb;
+                });
+
+                // D2101-3. Append original and received embeds
+                embeds = [emb, ...copiedEmbs];
+
+            }else{
+
+                // D2102-1. Create embeds
+                const emb = new EmbedBuilder()
+                    .setColor(0x00FFFF)
+                    .setAuthor({ name: `${msg.author.username +'#'+ msg.author.discriminator}`, iconURL: `${msg.author.displayAvatarURL(msg.author.avatar)}`})
+                    .setThumbnail(server_icon)
+                    .setDescription(`${msg.toString()}\u200B`)
+                    .addFields({ name: '\u200B', value: `[▷ Jump](${msg.url})`, inline: true })
+                    .setTimestamp()
+                    .setFooter({ text: `#${msg.channel.name}`, iconURL: server_icon })
+                
+                // D2102-2. Get images and set thumbnail
+                if (msg.attachments.size > 0) {
+                    const attachUrls = msg.attachments.map((attachment) => attachment.url);
+                    emb.setImage(attachUrls[0]);
+                }
+                
+                embeds.push(emb);
+            }
+        };
+        
+        const usrChannel = message.channel
+        
+        try{
+            sendMsg = usrChannel.send({embeds: embeds})
+                .then(async(dm) => {
+                await dm.react(deletionReact);
+            });
+
+            console.log(embeds);
+        }catch(e){
+            console.log(e);
+        };
+
+        return;
+    };
+        
+})
+
+// 4. launch client!
 ////
 client.login(token);
