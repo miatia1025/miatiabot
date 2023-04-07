@@ -26,8 +26,10 @@ if (fs.existsSync('.env')) {
 const channel_id = process.env.CHANNEL_ID;
 const token = process.env.BOT_TOKEN;
 const guild_id = process.env.GUILD_ID;
+const guild_id_nan = process.env.GUILD_ID_NAN;
 
 const pinningReact = process.env.PINNING_EMOJI;
+const pinningReactNan = process.env.PINNING_EMOJI_NAN;
 const deletionReact = "❌";
 
 // 0. On ready function
@@ -93,19 +95,29 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         console.log(`${user.username} / ${user.id}`);
         console.log(`reacted with ${reaction.emoji.identifier}`);
         
-        pinningInvoke = (reaction.emoji.id == pinningReact);
+        pinningInvoke = (reaction.emoji.id == pinningReact || reaction.emoji.id == pinningReactNan);
         
         console.log(`reaction.emoji.id = ${reaction.emoji.id}`);
-        console.log(`pinningReact = ${pinningReact}`);
+
+        if(reaction.emoji.id == pinningReact){
+            console.log(`pinningReact = ${pinningReact}`);
+        }else if(reaction.emoji.id == pinningReactNan){
+            console.log(`pinningReactNan = ${pinningReactNan}`);
+        }
     }else{
         // If ${user} reacted custom emoji, reaction.emoji has no identifier propety
         console.log(`${reaction.message.author.username} / ${reaction.message.author.id}`);
         console.log(`reacted with ${reaction.emoji.name}`);
         
-        pinningInvoke = (reaction.emoji.name == pinningReact);
+        pinningInvoke = (reaction.emoji.name == pinningReact || reaction.emoji.name == pinningReactNan);
         
         console.log(`reaction.emoji.name = ${reaction.emoji.name}`);
-        console.log(`pinningReact = ${pinningReact}`);
+
+        if(reaction.emoji.id == pinningReact){
+            console.log(`pinningReact = ${pinningReact}`);
+        }else if(reaction.emoji.id == pinningReactNan){
+            console.log(`pinningReactNan = ${pinningReactNan}`);
+        }
     }
     
     // X. Show ${pinningInvoke} for debug
@@ -124,7 +136,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         if(isGuild){
             
             // D21-0. Area limitation with ${guild_id}
-            if(reaction.message.guild.id == guild_id){
+            if(reaction.message.guild.id == guild_id || reaction.message.guild.id == guild_id_nan){
                 
                 // X. Show reaction sender infomations
                 console.log(user.username)
@@ -331,7 +343,17 @@ client.on(Events.MessageCreate, async (message) =>{
         console.log(`fxUrls : ${fxUrls}`)
 
         let channel = message.channel;
+
         fxMsg = channel.send(fxUrls.toString().replace(/,/g, "\n"))
+            .then(async(dm) => {
+                await dm.react(deletionReact);
+            });
+
+        try{
+            await message.suppressEmbeds(true);
+        }catch(e){
+            console.log(e);
+        }
     }
 
     if(hasDiscordMessageUrls){
