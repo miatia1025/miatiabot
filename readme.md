@@ -16,7 +16,7 @@ PINNING_EMOJI_NAN = 569712386945
 みたいな感じに記述することで  
 discordjsを使ってdiscordのbotが  
 ・BOT_TOKENで起動し  
-・GUILD_IDの鯖から全チャンネル、スレッド、トピックのIDを取得し
+・GUILD_IDの鯖から全チャンネル、スレッド、トピックのIDを取得し  
 ・PINNIN_EMOJIまたはPINNING_EMOJI_NANで指定したリアクションがGUILD_IDまたはGUILD_ID_NANの鯖で付いたとき  
 ・DMでリアクションがつけられたメッセージをリアクションを付けた本人に飛ばす  
 
