@@ -419,11 +419,15 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     // X. Show ${deletionInvoke}
     console.log(`deletionInvoke : ${deletionInvoke}`);
     //console.log(`recreateInvoke : ${recreateInvoke}`);
-
+    
     const isReply = reaction.message.reference && reaction.message.reference.messageId;
+    console.log(`isReply : ${isReply}`);
+
+    console.log(`user.id : ${user.id} - ${client.application.id}`)
     
 
     if(reaction.message.author.id == client.application.id && deletionInvoke && isReply){
+        console.log("いいいいい")
         try{
             const refMessage = await reaction.message.channel.messages.fetch(reaction.message.reference.messageId);;
 
@@ -437,7 +441,8 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         };
     }
     // E2. Deletion the message reacted with ${deletionReact}
-    else if (reaction.message.author.id == client.application.id && deletionInvoke && isReply == false || reaction.message.author.id == client.application.id && deletionInvoke && isMiatia){
+    else if (reaction.message.author.id == client.application.id && deletionInvoke && isReply !== true || reaction.message.author.id == client.application.id && deletionInvoke && isMiatia){
+        console.log("あああああああ")
         try{
             await reaction.message.fetch();
             await reaction.message.delete();
@@ -448,6 +453,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     }
     // E3. Revive embeds
     else if((reaction.message.author.id == user.id && recreateInvoke) || miatiaRecreateInvoke){
+        console.log("ううううう")
         try{
             reaction.message.suppressEmbeds(false)
             console.log("復活！");
@@ -457,12 +463,16 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     }
     // E4. Suppress any embeds
     else if((reaction.message.author.id == user.id && embDeletionInvoke) || miatiaEmbDeletionInvoke){
+        console.log("えええええ")
         try{
             reaction.message.suppressEmbeds(true)
             console.log("消去！");
         }catch(e){
             console.log(e);
         }
+    }
+    else{
+        console.log("全部の評価はずれてる");
     }
 });
 
@@ -474,6 +484,7 @@ client.on(Events.MessageCreate, async (message) =>{
     }catch(e){
         return;
     };
+
 
     const discordUrlPattern = /https?:\/\/(?:[a-z]+\.)?discord\.com\/channels\/[0-9]+\/[0-9]+\/[0-9]+/g;
     const twitterUrlPattern = /https?:\/\/twitter\.com\/.+/g;
@@ -505,7 +516,7 @@ client.on(Events.MessageCreate, async (message) =>{
         //////////////////////////
         // Temporary Disabled
         //////////////////////////
-        return;
+        //return;
         fxMsg = message.reply(fxUrls.toString().replace(/,/g, "\n"))
             .then(async(dm) => {
                 await dm.react(deletionReact);
@@ -523,7 +534,7 @@ client.on(Events.MessageCreate, async (message) =>{
         ////////////////////////////
         // Temporary Disabled
         ////////////////////////////
-        return;
+        //return;
         console.log(`${message.author.tag} : Sent message link!`);
         
         // Create embeds
@@ -552,6 +563,8 @@ client.on(Events.MessageCreate, async (message) =>{
             }
             
             const hasEmbed = typeof msg.embeds[0] !== 'undefined' ? true : false;
+
+            console.log(`hasEmbed : ${hasEmbed}`)
             
             // create empty arrays
             let initEmbs = []
@@ -675,6 +688,32 @@ client.on(Events.MessageCreate, async (message) =>{
                         initEmbs.push(emb);
                     };
 
+                    // 
+                    try{
+                        sendMsg = usrChannel.send({embeds: initEmbs})
+                            .then(async(dm) => {
+                            await dm.react(deletionReact);
+                        });
+            
+                        console.log(initEmbs);
+                    }catch(e){
+                        console.log(e);
+                    };
+                }
+                // No embeds or attachments resend
+                else{
+                    const emb = new EmbedBuilder()
+                        .setColor(0x00FFFF)
+                        .setTitle(`__Resend from Here__`)
+                        .setURL(`${msg.url}`)
+                        .setAuthor({ name: `${msg.author.username +'#'+ msg.author.discriminator}`, iconURL: `${msg.author.displayAvatarURL(msg.author.avatar)}`})
+                        .setThumbnail(server_icon)
+                        .setDescription(`${msg.toString()}\u200B`)
+                        .addFields({ name: '\u200B', value: `[▷ Jump](${msg.url})`, inline: true })
+                        .setTimestamp()
+                        .setFooter({ text: `#${msg.channel.name}`, iconURL: server_icon });
+                    
+                    initEmbs.push(emb);
 
                     // 
                     try{
@@ -687,6 +726,7 @@ client.on(Events.MessageCreate, async (message) =>{
                     }catch(e){
                         console.log(e);
                     };
+
                 };
                 
             };
