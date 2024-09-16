@@ -4,8 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "bot": "nodemon ./bot/index.js",
-    "full": "nodemon index.js"
+    "bot": "nodemon ./bot/index.js"
   },
   "keywords": [],
   "author": "",

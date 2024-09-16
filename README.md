@@ -25,6 +25,6 @@ index.js に千行詰め込んだあの頃が懐かしい
     `cd ./miatiadev`
 
 3.  npm run bot で bot 起動  
-    `cd ./miatiadev`
+    `npm run bot`
 
 4.  おわり。余った時間でラーメンでも食べよ
