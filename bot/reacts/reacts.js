@@ -1,3 +1,4 @@
+// コマンドを受け取ったbot側の処理を書くところ
 const pingReact = async (interaction) => {
   await interaction.reply("Pong");
 };

@@ -1,3 +1,4 @@
+// コマンド自体の情報を書くところ
 const pingCommand = {
   name: "ping",
   description: "bot replies with pong",
